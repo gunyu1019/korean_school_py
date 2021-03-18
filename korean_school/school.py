@@ -1,3 +1,26 @@
+"""
+MIT License
+
+Copyright (c) 2021 gunyu1019
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 from .request import requests
 from .exception import check_requests, NotFound
 from .model import *
@@ -6,7 +29,61 @@ from datetime import datetime
 t_id = {"초등학교": "els", "중학교": "mis", "고등학교": "his", "특수학교": "sps"}
 
 
-class school:
+class School:
+    """학교의 값이 저장되고, 이 클래스를 통하여 급식, 시간표, 학사 일정 등을 불러올 수 있습니다.
+
+        Parameters
+        ----------
+        token : Optional[str]
+            https://open.neis.go.kr/portal/guide/actKeyPage.do 에서 발급 받은 토큰값이 들어갑니다.
+        data : Optional[dict]
+            :class:`Client`의 값이 이어저 들어가게 구성되어 있습니다. 만약에 직접 사용하신 다면 이 매게변수에 아무런 값도 넣어주지 마세요.
+        sc_code : Optional[str]
+            교육청 코드가 들어가게 됩니다. 직접 사용하신 다면 이 값은 필수로 필요합니다. (참조: :class:`Location`)
+        sd_code : Optional[str]
+            해당 학교 고유번호가 들어가게 됩니다. 직접 사용하신 다면 이 값은 필수로 필요합니다.
+        kind : Optional[int]
+            학교의 종류가 들어갑니다. :def:`timetable`를 사용하기 위해서는 값을 넣으셔야합니다. (참조: :class:`SchoolType`)
+
+        Attributes
+        ----------
+        data
+            :class:`Client`에서 불러온 값이 저장됩니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        requests
+            NEIS Open API를 주고받는 aiohttp 형식의 웹 클라이언트입니다.
+        sc_code : str
+            교육청 코드가 들어가게 됩니다.
+        sd_code : str
+            학교 고유번호가 들어가게 됩니다.
+        ofcdc : str
+            학교가 소속된 관리 시/도 교육청 명칭이 들어가게 됩니다. 만약 직접 사용하신 다면 None이 리턴됩니다. (ex. 서울특별시교육청)
+        name : str
+            학교 명칭이 들어가게 됩니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        name_ENG : str
+            학교 영문 명칭이 들어가게 됩니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        type : str
+            학교의 종류가 들어갑니다.
+        provincial : str
+            학교의 소재지가 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다. (ex. 서울특별시)
+        location : str
+            학교가 소속된 교육청의 값이 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다. (ex. 서울특별시교육청)
+        post_address : str
+            학교의 우편번호가 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        address1 : str
+            학교의 주소가 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        address2 : str
+            학교의 세부주소가 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        phone : str
+            학교의 전화번호가 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        site : str
+            학교의 사이트 주소가 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        fax : str
+            학교의 팩스 번호가 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        opening : str
+            학교의 개교일이 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+        anniversary : str
+            학교의 개교기념일이 들어갑니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
+    """
     def __init__(self, data=None, token=None, sc_code: str = None, sd_code: str = None, kind: int = None):
         if data is None:
             data = dict()
@@ -42,6 +119,21 @@ class school:
                 self.type = tp[kind]
 
     async def meal(self, date: datetime = datetime.now(), from_date: datetime = None, to_date: datetime = None):
+        """급식 정보를 불러옵니다.
+            Parameters
+            ----------
+            date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다.
+            from_date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다. 만약에 특정 기간을 조회하고 싶으시면 본 매게변수를 이용해주세요.
+            to_date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다. 만약에 특정 기간을 조회하고 싶으시면 본 매게변수를 이용해주세요.
+
+            Returns
+            ----------
+            list[:class:`Meal`]
+                조회된 급식 목록이 들어가게 됩니다.
+        """
         if from_date is not None and to_date is not None:
             json2 = await self.requests.get(
                 "GET", "/mealServiceDietInfo",
@@ -59,7 +151,7 @@ class school:
         if len(json2.get('mealServiceDietInfo')[1].get('row')) == 0:
             raise NotFound
 
-        return [meal(x) for x in json2.get('mealServiceDietInfo')[1].get('row')]
+        return [Meal(x) for x in json2.get('mealServiceDietInfo')[1].get('row')]
 
     async def timetable(self, grade, class_nm,
                         date: datetime = datetime.now(), from_date: datetime = None, to_date: datetime = None,
@@ -94,7 +186,7 @@ class school:
                 ALL_TI_YMD=date.strftime("%Y%m%d"))
 
         check_requests(json2)
-        return [timetable(x) for x in json2.get(f'{t_id[type_nm]}Timetable')[1].get('row')]
+        return [Timetable(x) for x in json2.get(f'{t_id[type_nm]}Timetable')[1].get('row')]
 
     async def series(self):
         json2 = await self.requests.get(
@@ -106,9 +198,9 @@ class school:
         if len(json2.get('schulAflcoinfo')[1].get('row')) == 0:
             raise NotFound
 
-        return [series(x) for x in json2.get('schulAflcoinfo')[1].get('row')]
+        return [Series(x) for x in json2.get('schulAflcoinfo')[1].get('row')]
 
-    async def classInfo(self, grade=None, year=None):
+    async def class_info(self, grade=None, year=None):
         if isinstance(grade, int):
             grade = str(grade)
 
@@ -122,7 +214,7 @@ class school:
         if len(json2.get('classInfo')[1].get('row')) == 0:
             raise NotFound
 
-        return [classInfo(x) for x in json2.get('classInfo')[1].get('row')]
+        return [ClassInfo(x) for x in json2.get('classInfo')[1].get('row')]
 
     async def major(self, grade=None, year=None):
         if isinstance(grade, int):
@@ -138,7 +230,7 @@ class school:
         if len(json2.get('schoolMajorinfo')[1].get('row')) == 0:
             raise NotFound
 
-        return [major(x) for x in json2.get('schoolMajorinfo')[1].get('row')]
+        return [Major(x) for x in json2.get('schoolMajorinfo')[1].get('row')]
 
     async def schedule(self, date: datetime = datetime.now(), from_date: datetime = None, to_date: datetime = None):
         if from_date is not None and to_date is not None:
@@ -158,7 +250,7 @@ class school:
         if len(json2.get('SchoolSchedule')[1].get('row')) == 0:
             raise NotFound
 
-        return [schedule(x) for x in json2.get('SchoolSchedule')[1].get('row')]
+        return [Schedule(x) for x in json2.get('SchoolSchedule')[1].get('row')]
 
     async def timetable_room(self, grade=None, semester=None, year=None):
         json2 = await self.requests.get(
@@ -171,4 +263,4 @@ class school:
         if len(json2.get('tiClrminfo')[1].get('row')) == 0:
             raise NotFound
 
-        return [timetable_class(x) for x in json2.get('tiClrminfo')[1].get('row')]
+        return [TimetableClass(x) for x in json2.get('tiClrminfo')[1].get('row')]

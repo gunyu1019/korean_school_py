@@ -13,24 +13,26 @@ python3 -m pip install korean_school
 
 ### 예제(Samples)
 * Sample
-  * [급식 정보 불러오기](#급식 정보 불러오기)
-  * [시간표 정보 불러오기](#시간표 정보 불러오기)
-  * [학원 정보 불러오기](#학원 정보 불러오기)
+  * [급식 정보 불러오기](#급식-정보-불러오기)
+  * [시간표 정보 불러오기](#시간표-정보-불러오기)
+  * [학원 정보 불러오기](#학원-정보-불러오기)
     
 #### 급식 정보 불러오기
+
 ```python
 import korean_school
 import asyncio
 
 
 async def main():
-    client = korean_school.client()
-    school = await client.school(name="<학교명>")
-    meal = await school[0].meal()
-    
-    print(meal[0].meal)
-    print(meal[0].allergy)
-    print(meal[0].type)
+  client = korean_school.Client()
+  school = await client.school(name="<학교명>")
+  meal = await school[0].meal()
+
+  print(meal[0].Meal)
+  print(meal[0].allergy)
+  print(meal[0].type)
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
@@ -47,7 +49,7 @@ import asyncio
 
 
 async def main():
-    client = korean_school.client()
+    client = korean_school.Client()
     school = await client.school(name="<학교명>")
     # 학년과 반은 int형이나, str으로 작성해도 문제 없음.
     timetable = await school[0].timetable(grade="학년", class_nm="반")
@@ -67,7 +69,7 @@ import asyncio
 
 
 async def main():
-    client = korean_school.client()
+    client = korean_school.Client()
     # 학원 정보를 불러 올때에는 무조건 시/도 지역을 지정해주셔야합니다.
     academy = await client.academy(provincial_code=korean_school.Location.Seoul, name="<학원명>")
     print(academy[0].name)
