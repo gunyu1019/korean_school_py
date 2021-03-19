@@ -5,10 +5,10 @@ A python wrapper for [NEIS OpenAPI](https://open.neis.go.kr/portal/mainPage.do) 
 ### 설치(Installation)
 ```python3
 # Windows
-py -3 -m pip install korean_school
+py -3 -m pip install korean-school
 
 # Linux / MacOS
-python3 -m pip install korean_school
+python3 -m pip install korean-school
 ```
 
 ### 예제(Samples)
