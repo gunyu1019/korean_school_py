@@ -1,6 +1,3 @@
-from .request import requests
-from .school import School
-
 """
 MIT License
 
@@ -24,8 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .exception import check_requests, NotFound
+from .request import Requests
+from .school import School
+
+from .exception import NotFound
 from .model import Academy
+from .request import check_requests
 
 
 class Client:
@@ -43,7 +44,7 @@ class Client:
             token 값이 들어가게 되어 있습니다.
     """
     def __init__(self, token: str = None):
-        self.requests = requests(token)
+        self.requests = Requests(token)
         self.token = token
 
     async def school(self, name: str = None, kind: int = None, location: str = None, provincial_code: str = None):

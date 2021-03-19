@@ -79,3 +79,7 @@ async def main():
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 ```
+
+### 사용권(License)
+* MIT License<br/>
+**Copyright (c) 2021 gunyu1019**

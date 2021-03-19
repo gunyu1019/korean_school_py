@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .request import requests
-from .exception import check_requests, NotFound
+from .request import Requests, check_requests
+from .exception import NotFound
 from .model import *
 from datetime import datetime
 
@@ -47,7 +47,7 @@ class School:
 
         Attributes
         ----------
-        data
+        data : dict
             :class:`Client`에서 불러온 값이 저장됩니다. 만약 직접 사용하신 다면 None이 리턴됩니다.
         requests
             NEIS Open API를 주고받는 aiohttp 형식의 웹 클라이언트입니다.
@@ -89,7 +89,7 @@ class School:
             data = dict()
 
         self.data = data
-        self.requests = requests(token)
+        self.requests = Requests(token)
 
         self.sc_code = data.get('ATPT_OFCDC_SC_CODE')
         self.sd_code = data.get('SD_SCHUL_CODE')
@@ -156,10 +156,38 @@ class School:
     async def timetable(self, grade, class_nm,
                         date: datetime = datetime.now(), from_date: datetime = None, to_date: datetime = None,
                         semester=None, year=None):
+        """시간표 정보를 불러옵니다.
+            Parameters
+            ----------
+            grade : int or str
+                학년이 들어갑니다.
+            class_nm : int or str
+                반 정보가 들어갑니다.
+            date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다.
+            from_date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다. 만약에 특정 기간을 조회하고 싶으시면 본 매게변수를 이용해주세요.
+            to_date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다. 만약에 특정 기간을 조회하고 싶으시면 본 매게변수를 이용해주세요.
+            semester : Optional[int or str]
+                학기 정보가 들어갑니다.
+            year : Optional[int or str]
+                학년 정보가 정보가 들어갑니다.
+
+            Returns
+            ----------
+            list[:class:`Timetable`]
+                조회된 시간표 목록이 들어가게 됩니다.
+        """
         if isinstance(grade, int):
             grade = str(grade)
         if isinstance(class_nm, int):
             class_nm = str(class_nm)
+
+        if isinstance(year, int):
+            year = str(year)
+        if isinstance(semester, int):
+            semester = str(semester)
 
         class_nm = class_nm.zfill(2)
 
@@ -189,6 +217,13 @@ class School:
         return [Timetable(x) for x in json2.get(f'{t_id[type_nm]}Timetable')[1].get('row')]
 
     async def series(self):
+        """학교 계열정보 정보를 불러옵니다.
+
+            Returns
+            ----------
+            list[:class:`Series`]
+                조회된 학교 계열 정보 목록이 들어가게 됩니다.
+        """
         json2 = await self.requests.get(
             "GET", "/schulAflcoinfo",
             ATPT_OFCDC_SC_CODE=self.sc_code, SD_SCHUL_CODE=self.sd_code)
@@ -201,8 +236,24 @@ class School:
         return [Series(x) for x in json2.get('schulAflcoinfo')[1].get('row')]
 
     async def class_info(self, grade=None, year=None):
+        """학교 반 정보를 불러옵니다.
+            Parameters
+            ----------
+            grade : Optional[int or str]
+                학년이 들어갑니다.
+            year : Optional[int or str]
+                학년 정보가 정보가 들어갑니다.
+
+            Returns
+            ----------
+            list[:class:`ClassInfo`]
+                조회된 반 정보 목록이 들어가게 됩니다.
+        """
         if isinstance(grade, int):
             grade = str(grade)
+
+        if isinstance(year, int):
+            year = str(year)
 
         json2 = await self.requests.get(
             "GET", "/classInfo",
@@ -217,8 +268,24 @@ class School:
         return [ClassInfo(x) for x in json2.get('classInfo')[1].get('row')]
 
     async def major(self, grade=None, year=None):
+        """학교 학과 정보를 불러옵니다.
+            Parameters
+            ----------
+            grade : Optional[int or str]
+                학년이 들어갑니다.
+            year : Optional[int or str]
+                학년 정보가 정보가 들어갑니다.
+
+            Returns
+            ----------
+            list[:class:`Major`]
+                조회된 학교의 전공 계열 목록이 들어가게 됩니다.
+        """
         if isinstance(grade, int):
             grade = str(grade)
+
+        if isinstance(year, str):
+            year = str(year)
 
         json2 = await self.requests.get(
             "GET", "/schoolMajorinfo",
@@ -233,6 +300,21 @@ class School:
         return [Major(x) for x in json2.get('schoolMajorinfo')[1].get('row')]
 
     async def schedule(self, date: datetime = datetime.now(), from_date: datetime = None, to_date: datetime = None):
+        """학사 일정 정보를 불러옵니다.
+            Parameters
+            ----------
+            date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다.
+            from_date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다. 만약에 특정 기간을 조회하고 싶으시면 본 매게변수를 이용해주세요.
+            to_date : Optional[datetime]
+                조회하시는 급식 날짜가 들어갑니다. 만약에 특정 기간을 조회하고 싶으시면 본 매게변수를 이용해주세요.
+
+            Returns
+            ----------
+            list[:class:`Schedule`]
+                조회된 학사 일정 정보에 대한 목록이 들어가게 됩니다.
+        """
         if from_date is not None and to_date is not None:
             json2 = await self.requests.get(
                 "GET", "/SchoolSchedule",
@@ -253,6 +335,29 @@ class School:
         return [Schedule(x) for x in json2.get('SchoolSchedule')[1].get('row')]
 
     async def timetable_room(self, grade=None, semester=None, year=None):
+        """시간표에 따른 강의실 정보를 불러옵니다.
+            Parameters
+            ----------
+            grade : Optional[int or str]
+                학년이 들어갑니다.
+            semester: Optional[int or str]
+                검색하시는 학기 정보가 들어갑니다.
+            year : Optional[int or str]
+                학년 정보가 정보가 들어갑니다.
+
+            Returns
+            ----------
+            list[:class:`TimetableClass`]
+                조회된 시간표에 따른 강의실 정보가 목록으로 들어가게 됩니다.
+        """
+        if isinstance(grade, int):
+            grade = str(grade)
+
+        if isinstance(year, str):
+            year = str(year)
+        if isinstance(semester, str):
+            semester = str(semester)
+
         json2 = await self.requests.get(
             "GET", "/tiClrminfo",
             ATPT_OFCDC_SC_CODE=self.sc_code, SD_SCHUL_CODE=self.sd_code,

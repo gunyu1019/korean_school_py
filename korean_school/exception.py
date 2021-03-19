@@ -23,23 +23,6 @@ SOFTWARE.
 """
 
 
-def check_requests(resp):
-    if 'RESULT' in resp.keys():
-        if 'CODE' in resp['RESULT'].keys():
-            ercode = resp['RESULT']['CODE']
-            if ercode == 'INFO-200':
-                raise NotFound(resp['RESULT'])
-            elif ercode == 'INFO-300' or ercode == 'ERROR-290':
-                raise Forbidden(resp['RESULT'])
-            elif ercode == 'ERROR-300' or ercode == 'ERROR-333':
-                raise NotImplemented(resp['RESULT'])
-            elif ercode == 'ERROR-336' or ercode == 'ERROR-337':
-                raise TooManyRequests(resp['RESULT'])
-            elif ercode == 'ERROR-500' or ercode == 'ERROR-600' or ercode == 'ERROR-601':
-                raise InternalServerError(resp['RESULT'])
-    return
-
-
 class Schoolexception(Exception):
     """Korean-School의 메인 예외 클래스 입니다."""
     pass

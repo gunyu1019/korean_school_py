@@ -31,5 +31,6 @@ __version__ = "1.0"
 from .client import Client
 from .school import School
 from .exception import *
-from .definitions import *
 from .model import *
+from .location import Location
+from .schooltype import SchoolType
