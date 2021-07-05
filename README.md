@@ -29,7 +29,7 @@ async def main():
   school = await client.school(name="<학교명>")
   meal = await school[0].meal()
 
-  print(meal[0].Meal)
+  print(meal[0].meal)
   print(meal[0].allergy)
   print(meal[0].type)
 
